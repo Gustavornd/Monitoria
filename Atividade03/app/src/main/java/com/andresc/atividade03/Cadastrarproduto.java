@@ -4,11 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class    CadastrarCliente extends AppCompatActivity {
+public class Cadastrarproduto extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cadastrar_cliente);
+        setContentView(R.layout.activity_cadastrarproduto);
     }
 }
