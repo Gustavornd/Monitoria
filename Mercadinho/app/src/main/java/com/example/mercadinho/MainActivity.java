@@ -1,14 +1,20 @@
 package com.example.mercadinho;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.graphics.Insets;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,11 +32,12 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main),(v, insets) ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) ->
         {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
 
+            etCodigo = findViewById(R.id.etCodigo);
             etDescricao = findViewById(R.id.etDescricao);
             etUnidade = findViewById(R.id.etUnidade);
             etPreco = findViewById(R.id.etPreco);
@@ -43,116 +50,68 @@ public class MainActivity extends AppCompatActivity {
                     "preco REAL NOT NULL);");
             return insets;
         });
+    }
 
         public void inclusao(View v){
-            ContentValues registo = new ContentValues();
+            ContentValues registro = new ContentValues();
+            registro.put("descricao", etDescricao.getText().toString());
+            registro.put("unidade", etUnidade.getText().toString());
+            registro.put("preco", etPreco.getText().toString());
+            banco.insert("Produto", null, registro);
+            Toast.makeText(this, "Resgistro Incluído com Sucesso!", Toast.LENGTH_LONG).show();
         }
 
+        public void alterar(View v){
+            int key = Integer.parseInt(etCodigo.getText().toString());
+            ContentValues registro = new ContentValues();
 
+            registro.put("descricao", etDescricao.getText().toString());
+            registro.put("unidade", etUnidade.getText().toString());
+            registro.put("preco", etPreco.getText().toString());
 
-
-
-
-        // Espelhar os componentes do layout nos objetos Java
-        etDescricao = findViewById(R.id.etDescricao);
-        etUnidade = findViewById(R.id.etUnidade);
-        etPreco = findViewById(R.id.etPreco);
-        etCodigo = findViewById(R.id.etCodigo); // Campo para o ID do produto
-
-        // Criação ou abertura do banco de dados
-        banco = this.openOrCreateDatabase("mercadoDB", Context.MODE_PRIVATE, null);
-        banco.execSQL("CREATE TABLE IF NOT EXISTS Produto (" +
-                "idProduto INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "descricao TEXT NOT NULL, " +
-                "unidade TEXT NOT NULL, " +
-                "preco REAL NOT NULL);");
-    }
-
-    // Função para obter o ID do produto inserido no campo etCodigo
-    private int getIdProduto() {
-        // Verifica se o campo etCodigo está vazio antes de tentar converter para int
-        String codigoStr = etCodigo.getText().toString();
-        if (codigoStr.isEmpty()) {
-            Toast.makeText(this, "Por favor, insira o ID do produto.", Toast.LENGTH_SHORT).show();
-            return -1; // Retorna -1 se o campo estiver vazio
-        }
-        return Integer.parseInt(codigoStr);
-    }
-
-    public void salvarProduto(View v) {
-        ContentValues registro = new ContentValues();
-        registro.put("descricao", etDescricao.getText().toString());
-        registro.put("unidade", etUnidade.getText().toString());
-        registro.put("preco", Double.parseDouble(etPreco.getText().toString()));
-
-        banco.insert("Produto", null, registro);
-        Toast.makeText(this, "Produto salvo com sucesso!", Toast.LENGTH_SHORT).show();
-        limparCampos();
-    }
-
-    public void alterarProduto(View v) {
-        int idProduto = getIdProduto(); // Obtém o ID do produto
-        if (idProduto == -1) return; // Verifica se o ID é válido
-
-        ContentValues registro = new ContentValues();
-        registro.put("descricao", etDescricao.getText().toString());
-        registro.put("unidade", etUnidade.getText().toString());
-        registro.put("preco", Double.parseDouble(etPreco.getText().toString()));
-
-        int rowsAffected = banco.update("Produto", registro, "idProduto = ?", new String[]{String.valueOf(idProduto)});
-        if (rowsAffected > 0) {
-            Toast.makeText(this, "Produto alterado com sucesso!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Produto não encontrado!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void excluirProduto(View v) {
-        int idProduto = getIdProduto(); // Obtém o ID do produto
-        if (idProduto == -1) return; // Verifica se o ID é válido
-
-        int rowsDeleted = banco.delete("Produto", "idProduto = ?", new String[]{String.valueOf(idProduto)});
-        if (rowsDeleted > 0) {
-            Toast.makeText(this, "Produto excluído com sucesso!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Produto não encontrado!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void pesquisarProduto(View v) {
-        int idProduto = getIdProduto(); // Obtém o ID do produto
-        if (idProduto == -1) return; // Verifica se o ID é válido
-
-        Cursor cursor = banco.query("Produto", null, "idProduto = ?", new String[]{String.valueOf(idProduto)},
-                null, null, null);
-
-        if (cursor.moveToFirst()) {
-            etDescricao.setText(cursor.getString(cursor.getColumnIndexOrThrow("descricao")));
-            etUnidade.setText(cursor.getString(cursor.getColumnIndexOrThrow("unidade")));
-            etPreco.setText(cursor.getString(cursor.getColumnIndexOrThrow("preco")));
-        } else {
-            Toast.makeText(this, "Produto não encontrado!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void listarProdutos(View v) {
-        Cursor cursor = banco.rawQuery("SELECT * FROM Produto", null);
-
-        StringBuilder listagem = new StringBuilder();
-        while (cursor.moveToNext()) {
-            listagem.append("ID: ").append(cursor.getInt(cursor.getColumnIndexOrThrow("idProduto"))).append("\n");
-            listagem.append("Descrição: ").append(cursor.getString(cursor.getColumnIndexOrThrow("descricao"))).append("\n");
-            listagem.append("Unidade: ").append(cursor.getString(cursor.getColumnIndexOrThrow("unidade"))).append("\n");
-            listagem.append("Preço: ").append(cursor.getDouble(cursor.getColumnIndexOrThrow("preco"))).append("\n\n");
+            banco.update("Produto", registro, "idProduto = " + key, null);
+            Toast.makeText(this, "Resgistro Alterado com Sucesso!", Toast.LENGTH_LONG).show();
         }
 
-        Toast.makeText(this, listagem.toString(), Toast.LENGTH_LONG).show();
-    }
+        public void excluir(View v) {
+            int key = Integer.parseInt(etCodigo.getText().toString());
+            banco.delete("Produto","idProduto = " + key, null );
+            Toast.makeText(this, "Resgistro Excluído com Sucesso!", Toast.LENGTH_LONG).show();
+        }
 
-    private void limparCampos() {
-        etDescricao.setText("");
-        etUnidade.setText("");
-        etPreco.setText("");
-        etCodigo.setText(""); // Limpa o campo de código (ID)
+        public void pesquisar(View v){
+            final EditText etPesquisa = new EditText(getApplicationContext());
+            etPesquisa.setTextColor(Color.BLACK);
+            AlertDialog.Builder telaPesquisa = new AlertDialog.Builder(this);
+            telaPesquisa.setTitle("Pesquisar");
+            telaPesquisa.setMessage("Código a ser pesquisado: ");
+            telaPesquisa.setView(etPesquisa);
+            telaPesquisa.setNegativeButton("Cancelar", null);
+            telaPesquisa.setPositiveButton("Pesquisar", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which) {
+                    executarPesquisa(Integer.parseInt(etPesquisa.getText().toString()));
+                }
+            });
+            telaPesquisa.show();
+        }
+        @SuppressLint("Range")
+        protected void executarPesquisa(int id){
+            Cursor registros = banco.query("Produto", null, " idProduto = " + id,
+                    null, null, null, null);
+            if(registros.moveToNext()){
+                String descricaoProduto = registros.getString(registros.getColumnIndex("descricao"));
+                String unidadePrduto = registros.getString(registros.getColumnIndex("unidade"));
+                String precoProduto = registros.getString(registros.getColumnIndex("preco"));
+                etDescricao.setText(String.valueOf(descricaoProduto));
+                etUnidade.setText(String.valueOf(unidadePrduto));
+                etPreco.setText(String.valueOf(precoProduto));
+            }
+        }
+
+        public void listar(View v){
+            Intent intencao = new Intent(MainActivity.this, ListaActivity.class);
+            startActivity(intencao);
+        }
     }
 }
