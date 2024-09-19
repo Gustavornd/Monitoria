@@ -52,66 +52,65 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-        public void inclusao(View v){
-            ContentValues registro = new ContentValues();
-            registro.put("descricao", etDescricao.getText().toString());
-            registro.put("unidade", etUnidade.getText().toString());
-            registro.put("preco", etPreco.getText().toString());
-            banco.insert("Produto", null, registro);
-            Toast.makeText(this, "Resgistro Incluído com Sucesso!", Toast.LENGTH_LONG).show();
-        }
+    public void salvarProduto(View v){
+        ContentValues registro = new ContentValues();
+        registro.put("descricao", etDescricao.getText().toString());
+        registro.put("unidade", etUnidade.getText().toString());
+        registro.put("preco", etPreco.getText().toString());
+        banco.insert("Produto", null, registro);
+        Toast.makeText(this, "Resgistro Incluído com Sucesso!", Toast.LENGTH_LONG).show();
+    }
 
-        public void alterar(View v){
-            int key = Integer.parseInt(etCodigo.getText().toString());
-            ContentValues registro = new ContentValues();
+    public void alterarProduto(View v){
+        int key = Integer.parseInt(etCodigo.getText().toString());
+        ContentValues registro = new ContentValues();
 
-            registro.put("descricao", etDescricao.getText().toString());
-            registro.put("unidade", etUnidade.getText().toString());
-            registro.put("preco", etPreco.getText().toString());
+        registro.put("descricao", etDescricao.getText().toString());
+        registro.put("unidade", etUnidade.getText().toString());
+        registro.put("preco", etPreco.getText().toString());
 
-            banco.update("Produto", registro, "idProduto = " + key, null);
-            Toast.makeText(this, "Resgistro Alterado com Sucesso!", Toast.LENGTH_LONG).show();
-        }
+        banco.update("Produto", registro, "idProduto = " + key, null);
+        Toast.makeText(this, "Resgistro Alterado com Sucesso!", Toast.LENGTH_LONG).show();
+    }
 
-        public void excluir(View v) {
-            int key = Integer.parseInt(etCodigo.getText().toString());
-            banco.delete("Produto","idProduto = " + key, null );
-            Toast.makeText(this, "Resgistro Excluído com Sucesso!", Toast.LENGTH_LONG).show();
-        }
+    public void excluirProduto(View v) {
+        int key = Integer.parseInt(etCodigo.getText().toString());
+        banco.delete("Produto","idProduto = " + key, null );
+        Toast.makeText(this, "Resgistro Excluído com Sucesso!", Toast.LENGTH_LONG).show();
+    }
 
-        public void pesquisar(View v){
-            final EditText etPesquisa = new EditText(getApplicationContext());
-            etPesquisa.setTextColor(Color.BLACK);
-            AlertDialog.Builder telaPesquisa = new AlertDialog.Builder(this);
-            telaPesquisa.setTitle("Pesquisar");
-            telaPesquisa.setMessage("Código a ser pesquisado: ");
-            telaPesquisa.setView(etPesquisa);
-            telaPesquisa.setNegativeButton("Cancelar", null);
-            telaPesquisa.setPositiveButton("Pesquisar", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int which) {
-                    executarPesquisa(Integer.parseInt(etPesquisa.getText().toString()));
-                }
-            });
-            telaPesquisa.show();
-        }
-        @SuppressLint("Range")
-        protected void executarPesquisa(int id){
-            Cursor registros = banco.query("Produto", null, " idProduto = " + id,
-                    null, null, null, null);
-            if(registros.moveToNext()){
-                String descricaoProduto = registros.getString(registros.getColumnIndex("descricao"));
-                String unidadePrduto = registros.getString(registros.getColumnIndex("unidade"));
-                String precoProduto = registros.getString(registros.getColumnIndex("preco"));
-                etDescricao.setText(String.valueOf(descricaoProduto));
-                etUnidade.setText(String.valueOf(unidadePrduto));
-                etPreco.setText(String.valueOf(precoProduto));
+    public void pesquisarProduto(View v){
+        final EditText etPesquisa = new EditText(getApplicationContext());
+        etPesquisa.setTextColor(Color.BLACK);
+        AlertDialog.Builder telaPesquisa = new AlertDialog.Builder(this);
+        telaPesquisa.setTitle("Pesquisar");
+        telaPesquisa.setMessage("Código a ser pesquisado: ");
+        telaPesquisa.setView(etPesquisa);
+        telaPesquisa.setNegativeButton("Cancelar", null);
+        telaPesquisa.setPositiveButton("Pesquisar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+                executarPesquisa(Integer.parseInt(etPesquisa.getText().toString()));
             }
+        });
+        telaPesquisa.show();
+    }
+    @SuppressLint("Range")
+    protected void executarPesquisa(int id){
+        Cursor registros = banco.query("Produto", null, " idProduto = " + id,
+                null, null, null, null);
+        if(registros.moveToNext()){
+            String descricaoProduto = registros.getString(registros.getColumnIndex("descricao"));
+            String unidadePrduto = registros.getString(registros.getColumnIndex("unidade"));
+            String precoProduto = registros.getString(registros.getColumnIndex("preco"));
+            etDescricao.setText(String.valueOf(descricaoProduto));
+            etUnidade.setText(String.valueOf(unidadePrduto));
+            etPreco.setText(String.valueOf(precoProduto));
         }
+    }
 
-        public void listar(View v){
-            Intent intencao = new Intent(MainActivity.this, ListaActivity.class);
-            startActivity(intencao);
-        }
+    public void listarProdutos(View v){
+        Intent intencao = new Intent(MainActivity.this, ListaActivity.class);
+        startActivity(intencao);
     }
 }
